@@ -2,7 +2,7 @@
 
 Parts are rendered via the entry.scad entry point.  Any complete models must be parameterized and moved into the lib folder.  maind.scad is only for rendering STL files and should be left blank in the repository (.gitignore);
 
-# Codign Standards
+# Coding Standards
 
 * All files committed must build without error.
 * camelCasing naming convention
