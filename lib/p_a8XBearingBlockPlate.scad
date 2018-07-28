@@ -22,7 +22,7 @@ linearRodGapCenter = linearRodDistanceOuter - linearRodWidth;
 
 
 
-module a8XBearingBlockPlate(topBearingGap, depth) {
+module p_a8XBearingBlockPlate(topBearingGap, depth) {
     bearingWidth = 30;
     bearingHeight = 34;
     plateWidthExtra = 2;
