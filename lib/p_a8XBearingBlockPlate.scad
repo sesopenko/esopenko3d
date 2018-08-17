@@ -3,19 +3,22 @@
 Renders a hotend mount backplate which mates with the X axis bearing blocks of the anet a8.
 */
 
-use <SCS8UUHoles.scad>
+use <p_SCS8UUHoles.scad>;
+
+include <c_scs8uu.scad>;
+include <c_a8.scad>;
 
 // a8XBearingBlockPlate
 // INPUT VARIABLES FOR PRINTER DIMENSIONS
 // Use calipers to measure the outer distance between your two linear rods
-linearRodDistanceOuter = 54;
+c_a8_linearRodDistanceOuter = 54;
 
 // Enter the width of your linear rods
-linearRodWidth = 8;
+c_a8_linearRodWidth = 8;
 
 // END INPUT VARIABLES FOR PRINTER DIMENSIONS
 
-linearRodGapCenter = linearRodDistanceOuter - linearRodWidth;
+c_a8_linearRodGapCenter = c_a8_linearRodDistanceOuter - c_a8_linearRodWidth;
 
 // @see https://www.trfastenings.com/Products/knowledgebase/Tables-Standards-Terminology/Tapping-Sizes-and-Clearance-Holes
 
@@ -23,37 +26,37 @@ linearRodGapCenter = linearRodDistanceOuter - linearRodWidth;
 
 
 module p_a8XBearingBlockPlate(topBearingGap, depth) {
-    bearingWidth = 30;
-    bearingHeight = 34;
+    c_scs8uu_bearingWidth = 30;
+    c_scs8uu_bearingHeight = 34;
     plateWidthExtra = 2;
-    plateWidth = plateWidthExtra + bearingWidth + topBearingGap + bearingWidth + plateWidthExtra;
-    lowerBearingXOffset = (plateWidth / 2) - (bearingWidth / 2);
-    lowerBearingYOffset = linearRodGapCenter;
+    plateWidth = plateWidthExtra + c_scs8uu_bearingWidth + topBearingGap + c_scs8uu_bearingWidth + plateWidthExtra;
+    lowerBearingXOffset = (plateWidth / 2) - (c_scs8uu_bearingWidth / 2);
+    lowerBearingYOffset = c_a8_linearRodGapCenter;
 
     // TODO:  calculate!
-    height = plateWidthExtra + (bearingHeight / 2) + linearRodGapCenter + (bearingHeight / 2) + plateWidthExtra;
+    height = plateWidthExtra + (c_scs8uu_bearingHeight / 2) + c_a8_linearRodGapCenter + (c_scs8uu_bearingHeight / 2) + plateWidthExtra;
     difference() {
         cube([plateWidth, height, depth]);
         union() {
             // 2 bearings on top with their linear cylinders oriented horizontally
             translate([plateWidthExtra, plateWidthExtra, 0]) {
-                translate([bearingWidth, 0, 0]) {
+                translate([c_scs8uu_bearingWidth, 0, 0]) {
                     rotate([0, 0, 90]) {
-                        SCS8UUHoles(depth);
+                        p_SCS8UUHoles(depth);
                     }
                 }
             }
-            translate([plateWidthExtra + topBearingGap + bearingWidth, plateWidthExtra, 0]) {
-                translate([bearingWidth, 0, 0]) {
+            translate([plateWidthExtra + topBearingGap + c_scs8uu_bearingWidth, plateWidthExtra, 0]) {
+                translate([c_scs8uu_bearingWidth, 0, 0]) {
                     rotate([0, 0, 90]) {
-                        SCS8UUHoles(depth);
+                        p_SCS8UUHoles(depth);
                     }
                 }
             }
             translate([lowerBearingXOffset, lowerBearingYOffset, 0]) {
-                translate([bearingWidth, 0, 0]) {
+                translate([c_scs8uu_bearingWidth, 0, 0]) {
                     rotate([0, 0, 90]) {
-                        SCS8UUHoles(depth, 2);
+                        p_SCS8UUHoles(depth, 2);
                     }
                 }
             }
