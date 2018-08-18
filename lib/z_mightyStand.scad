@@ -2,15 +2,15 @@ slotAllowance = 1;
 mightyWidth = 78 + slotAllowance;
 // depth does not include embelishment sticking out of bottom of unit
 mightyDepth = 24 + slotAllowance;
-slotDepth = 42;
+slotDepth = 44;
 standWallWidth = 3;
-controlWidth = 38;
+controlWidth = 53;
 controlHeight = 28;
 controlDistanceFromUnitBottom = 19;
 
 powerButtonDiameter = 9;
 // Distance from center of button to bottom of unit.
-powerButtonDistanceFromUnitBottom = 29;
+powerButtonDistanceFromUnitBottom = 28;
 powerButtonProtrusionAllowance = 10;
 
 // The triangular Protrusion embelishment at the bottom, under the screen.
