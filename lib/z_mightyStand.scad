@@ -25,7 +25,6 @@ module z_mightyStand() {
         translate([standWallWidth, standWallWidth, standWallWidth]) {
             unitSlot(slotDepth);
         }
-        
     }
 }
 
@@ -56,9 +55,7 @@ module shellSubtractions(shellWidth, shellDepth) {
     translate([0,  shellDepth / 2, powerButtonDiameter / 2 + standWallWidth + powerButtonDistanceFromUnitBottom]) {
         controlButtonSlot();
     }
-    lowerProtrusion();
-    
-    
+    lowerProtrusion();   
 }
 
 module lowerProtrusion() {
@@ -74,11 +71,7 @@ module lowerProtrusion() {
                 ]);
             }
         }
-    }
-    
-    
-    
-    
+    }  
 }
 
 module shellCylinder(shellDepth) {
@@ -95,14 +88,11 @@ module controlButtonSlot() {
     slotLength = slotDepth - controlDistanceFromUnitBottom;
     rotate([90, 0 , 90]) {
         cylinder(powerButtonProtrusionAllowance, buttonRadius, buttonRadius, $fs = 0.2);
-
     
         translate([-powerButtonDiameter / 2, 0]) {
             cube([powerButtonDiameter, slotLength, powerButtonProtrusionAllowance]);
         }
     }
-    
-    
 }
 
 module unitSlot(slotDepth) {
