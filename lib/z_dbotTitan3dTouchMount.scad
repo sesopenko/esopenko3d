@@ -27,6 +27,9 @@ motorMountThickness = 4.2;
 // Thickness of the plastic mounted to the wheeled gantry
 gantryMountThickness = 3.96;
 
+    
+lowerGantryHeight = 7;
+
 // The triangular bracket for the motor mount
 motorAngleBracketDepth = 16;
 motorAngleBracketThickness = gantryMountThickness;
@@ -67,8 +70,6 @@ module hotendHolder() {
     // measurements
     // Distance from left of gantry mount to center of hotend
     leftGantryToHotendCenter = 34;
-    // Distance from bottom of heatsink to bottom of inner cylinder mount
-    innerMountBottomToHeatsinkBottom = 33.3;
     // Inner diameter of the part gripped
     innerMountCylinderDiameter = 11.96;
     // Outer diameter of the part above & below the gripped cylinder
@@ -93,18 +94,21 @@ module hotendMount(innerMountCylinderDiameter, innerMountHeight, outerMountCylin
     hotendMountWidth = innerMountCylinderDiameter + (hotendMountExtension * 2);
     cylinderAllowance = 0.2;
     hotendCenteringTranslationX = -motorAngleBracketDepth+ leftGantryToHotendCenter - (hotendMountWidth / 2);
-    translate([hotendCenteringTranslationX, -hotendMountDepth, 0]) {
+    cylinderTolerance = 0.2;
+    lowerOuterMountCylinderHeight = 3 + 0.2;
+    upperOuterMountCylinderHeight = 3.68 + 0.2;
+    // Distance from bottom of heatsink to bottom of inner cylinder mount
+    innerMountBottomToHeatsinkBottom = 33.3;
+    translate([hotendCenteringTranslationX, -hotendMountDepth, -lowerGantryHeight + innerMountBottomToHeatsinkBottom - lowerOuterMountCylinderHeight]) {
         difference() {
-            hotendMountBody(hotendMountWidth, hotendMountDepth, innerMountHeight, innerMountCylinderDiameter, outerMountCylinderDiameter);
+            hotendMountBody(hotendMountWidth, hotendMountDepth, innerMountHeight, innerMountCylinderDiameter, outerMountCylinderDiameter, lowerOuterMountCylinderHeight, upperOuterMountCylinderHeight);
             hotendMountBodyHardwareSubtractions(innerMountCylinderDiameter, innerMountHeight, hotendMountExtension, hotendMountWidth);
         }
         
     }
 }
 
-module hotendMountBody(hotendMountWidth, hotendMountDepth, innerMountHeight, innerMountCylinderDiameter, outerMountCylinderDiameter) {
-    lowerOuterMountCylinderHeight = 3;
-    upperOuterMountCylinderHeight = 3.68;
+module hotendMountBody(hotendMountWidth, hotendMountDepth, innerMountHeight, innerMountCylinderDiameter, outerMountCylinderDiameter, lowerOuterMountCylinderHeight, upperOuterMountCylinderHeight) {
     fullMountHeight = innerMountHeight + lowerOuterMountCylinderHeight + upperOuterMountCylinderHeight;
     topMountZTranslation = -lowerOuterMountCylinderHeight;
     mountCylinderAllowance = 0.2;
@@ -151,10 +155,12 @@ module hotendMountBodyHardwareSubtractions(innerMountCylinderDiameter, innerMoun
 
 module hotendNutPocket() {
     // m3 nut
-    nutShortWidth = 5.5;
-    nutLongWidth = 6.1;
-    nutDepth = 2.24;
+    nutPocketTolerance = 0.2;
+    nutShortWidth = 5.5 + nutPocketTolerance;
+    nutLongWidth = 6.1 + nutPocketTolerance;
+    nutDepth = 2.24 + nutPocketTolerance;
     nutPocketSocketLength = 8;
+    
     translate([-nutPocketSocketLength, -nutShortWidth / 2, 0]) {
         cube([nutLongWidth + nutPocketSocketLength, nutShortWidth, nutDepth]);
     }
@@ -280,8 +286,7 @@ module bltouchScrewHole() {
 }
 
 module lowerGantryMount() {
-    
-    lowerGantryHeight = 7;
+
     lowerGantryHeightToBracket = lowerGantryHeight + motorAngleBracketThickness;
     translate([-motorAngleBracketDepth, 0, -lowerGantryHeightToBracket]) {
         difference() {
