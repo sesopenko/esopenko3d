@@ -86,22 +86,59 @@ module hotendHolder() {
 
 module hotendMount(innerMountCylinderDiameter, innerMountHeight, outerMountCylinderDiameter, radiatorDiameter, leftGantryToHotendCenter) {
     // The extra distance on each side of the part gripping the hotend.
-    hotendMountExtension = 3;
+    hotendMountExtension = 12;
     // The target distance between the hotend and the gantry.
     targetGantryToHotendDistance = 3;
     hotendMountDepth = radiatorDiameter / 2 + targetGantryToHotendDistance;
-    hotendMountWidth = outerMountCylinderDiameter + (hotendMountExtension * 2);
+    hotendMountWidth = innerMountCylinderDiameter + (hotendMountExtension * 2);
     cylinderAllowance = 0.2;
     hotendCenteringTranslationX = -motorAngleBracketDepth+ leftGantryToHotendCenter - (hotendMountWidth / 2);
     translate([hotendCenteringTranslationX, -hotendMountDepth, 0]) {
         difference() {
-            cube([hotendMountWidth, hotendMountDepth, innerMountHeight]);
-            translate([hotendMountWidth / 2, 0, 0]) {
-                cylinder(h = innerMountHeight, r = (innerMountCylinderDiameter / 2) + 0.2);
+            hotendMountBody(hotendMountWidth, hotendMountDepth, innerMountHeight, innerMountCylinderDiameter);
+            hotendMountBodyHardwareSubtractions(innerMountCylinderDiameter, innerMountHeight, hotendMountExtension, hotendMountWidth);
+        }
+        
+    }
+}
+
+module hotendMountBody(hotendMountWidth, hotendMountDepth, innerMountHeight, innerMountCylinderDiameter) {
+    difference() {
+        cube([hotendMountWidth, hotendMountDepth, innerMountHeight]);
+        translate([hotendMountWidth / 2, 0, 0]) {
+            cylinder(h = innerMountHeight, r = (innerMountCylinderDiameter / 2) + 0.2);
+        }
+    }
+}
+
+module hotendMountBodyHardwareSubtractions(innerMountCylinderDiameter, innerMountHeight, hotendMountExtension, hotendMountWidth) {
+    screwHoleDepth = innerMountCylinderDiameter + 2;
+    nutPocketDepth = innerMountCylinderDiameter / 2;
+    rotate([-90, 0, 0]) {
+        translate([0, -innerMountHeight / 2, 0]) {
+            translate([hotendMountExtension / 2, 0, 0]) {
+                m3ScrewHole(screwHoleDepth);
+            }
+            translate([hotendMountWidth - hotendMountExtension / 2, 0, 0]) {
+                m3ScrewHole(screwHoleDepth);
             }
         }
-        //cube([hotendMountWidth, hotendMountDepth, innerMountHeight]);
+        translate([hotendMountExtension / 2, -innerMountHeight / 2, nutPocketDepth]) {
+            hotendNutPocket();
+        }
     }
+}
+
+module hotendNutPocket() {
+    // m3 nut
+    nutShortWidth = 5.5;
+    nutLongWidth = 6.1;
+    nutDepth = 2.24;
+    nutPocketSocketLength = 8;
+    translate([-nutPocketSocketLength, -nutShortWidth / 2, 0]) {
+        cube([nutLongWidth + nutPocketSocketLength, nutShortWidth, nutDepth]);
+    }
+    
 }
 
 module cordHolder() {
