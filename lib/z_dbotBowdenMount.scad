@@ -47,7 +47,7 @@ topGantryMountHeight = 7;
 
 lowerGantryWidth = 24.8;
 
-module z_dbotTitan3dTouchMount() {
+module z_dbotBowdenMount() {
     union() {
         gantryMounts();
         hotendHolder();
@@ -80,9 +80,7 @@ module hotendHolder() {
     lowerMountCylinderHeight = 7;
     // The diameter of the radiator
     radiatorDiameter = 22;
-    translate([0, 0, 0]) {
-        hotendMount(innerMountCylinderDiameter, innerMountHeight, outerMountCylinderDiameter, radiatorDiameter, leftGantryToHotendCenter);
-    }
+    hotendMount(innerMountCylinderDiameter, innerMountHeight, outerMountCylinderDiameter, radiatorDiameter, leftGantryToHotendCenter);
 }
 
 module hotendMount(innerMountCylinderDiameter, innerMountHeight, outerMountCylinderDiameter, radiatorDiameter, leftGantryToHotendCenter) {
@@ -97,9 +95,8 @@ module hotendMount(innerMountCylinderDiameter, innerMountHeight, outerMountCylin
     cylinderTolerance = 0.2;
     lowerOuterMountCylinderHeight = 3 + 0.2;
     upperOuterMountCylinderHeight = 3.68 + 0.2;
-    // Distance from bottom of heatsink to bottom of inner cylinder mount
-    innerMountBottomToHeatsinkBottom = 33.3;
-    translate([hotendCenteringTranslationX, -hotendMountDepth, -lowerGantryHeight + innerMountBottomToHeatsinkBottom - lowerOuterMountCylinderHeight]) {
+    targetHotendHeight = 12;
+    translate([hotendCenteringTranslationX, -hotendMountDepth, -lowerGantryHeight + targetHotendHeight - lowerOuterMountCylinderHeight]) {
         difference() {
             hotendMountBody(hotendMountWidth, hotendMountDepth, innerMountHeight, innerMountCylinderDiameter, outerMountCylinderDiameter, lowerOuterMountCylinderHeight, upperOuterMountCylinderHeight);
             hotendMountBodyHardwareSubtractions(innerMountCylinderDiameter, innerMountHeight, hotendMountExtension, hotendMountWidth);
