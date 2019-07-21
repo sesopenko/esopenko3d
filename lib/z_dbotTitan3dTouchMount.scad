@@ -95,18 +95,32 @@ module hotendMount(innerMountCylinderDiameter, innerMountHeight, outerMountCylin
     hotendCenteringTranslationX = -motorAngleBracketDepth+ leftGantryToHotendCenter - (hotendMountWidth / 2);
     translate([hotendCenteringTranslationX, -hotendMountDepth, 0]) {
         difference() {
-            hotendMountBody(hotendMountWidth, hotendMountDepth, innerMountHeight, innerMountCylinderDiameter);
+            hotendMountBody(hotendMountWidth, hotendMountDepth, innerMountHeight, innerMountCylinderDiameter, outerMountCylinderDiameter);
             hotendMountBodyHardwareSubtractions(innerMountCylinderDiameter, innerMountHeight, hotendMountExtension, hotendMountWidth);
         }
         
     }
 }
 
-module hotendMountBody(hotendMountWidth, hotendMountDepth, innerMountHeight, innerMountCylinderDiameter) {
+module hotendMountBody(hotendMountWidth, hotendMountDepth, innerMountHeight, innerMountCylinderDiameter, outerMountCylinderDiameter) {
+    lowerOuterMountCylinderHeight = 3;
+    upperOuterMountCylinderHeight = 3.68;
+    fullMountHeight = innerMountHeight + lowerOuterMountCylinderHeight + upperOuterMountCylinderHeight;
+    topMountZTranslation = -lowerOuterMountCylinderHeight;
+    mountCylinderAllowance = 0.2;
     difference() {
-        cube([hotendMountWidth, hotendMountDepth, innerMountHeight]);
+        translate([0, 0, topMountZTranslation]) {
+            cube([hotendMountWidth, hotendMountDepth, fullMountHeight]);
+        }
+        
         translate([hotendMountWidth / 2, 0, 0]) {
-            cylinder(h = innerMountHeight, r = (innerMountCylinderDiameter / 2) + 0.2);
+            cylinder(h = innerMountHeight, r = (innerMountCylinderDiameter / 2) + mountCylinderAllowance);
+            translate([0, 0, innerMountHeight]) {
+                cylinder(h = upperOuterMountCylinderHeight, r = (outerMountCylinderDiameter / 2) + mountCylinderAllowance);
+            }
+            translate([0, 0, -lowerOuterMountCylinderHeight]) {
+                cylinder(h = lowerOuterMountCylinderHeight, r = (outerMountCylinderDiameter / 2) + mountCylinderAllowance);
+            }
         }
     }
 }
