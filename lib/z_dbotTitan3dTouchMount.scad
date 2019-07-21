@@ -39,19 +39,167 @@ originalModelScrewHole = 3.2;
 originalModelScrewHoleDistance = 10.8;
 originalModelScrewHoleDistanceLeftEdge = 1.9;
 
+topGantryMountWidth = 43;
+topGantryMountHeight = 7;
+
+lowerGantryWidth = 24.8;
+
 module z_dbotTitan3dTouchMount() {
     union() {
         motorMount();
         gantryMounts();
     }
     
-    
 }
 
 module gantryMounts() {
-    lowerGantryMount();
-    topGantryMount();
-    motorGantryMount();
+    difference() {
+        union() {
+            lowerGantryMount();
+            topGantryMount();
+            motorGantryMount();
+            cordHolder();
+        }
+        extruderGearOpening();
+    }
+    
+    
+    
+}
+
+module extruderGearOpening() {
+    gearWidthAllowance = 9.2;
+    gearWidthDistance = 9;
+    translate([motorMountThickness, motorWidth + gantryMountThickness + 1, motorMountHeight]) {
+        rotate([90, 0, ,0]) {
+            linear_extrude(gantryMountThickness + 2) {
+                polygon([
+                    [0, -motorAngleBracketThickness - 1],
+                    [0, 0],
+                    [1.2, gearWidthDistance],
+                    [1.2 + gearWidthAllowance, gearWidthDistance],
+                    [1.2 + gearWidthAllowance + 3.7, 0],
+                    [1.2 + gearWidthAllowance + 3.7, -motorAngleBracketThickness - 1],
+                ]);
+            }
+        }
+    }
+}
+
+module cordHolder() {
+    translate([-motorAngleBracketDepth, motorWidth + gantryMountThickness, motorMountHeight + topGantryMountHeight]) {
+        rotate([90, 0, 0]) {
+            cordHolderGeometry();
+        }
+        
+    }
+}
+
+module cordHolderGeometry() {
+    braceHeight = 3;
+    braceWidth = 3;
+    holderWidth = 6.5;
+    holderDistanceFromLeft = 30;
+    holderBaseHeight = 12;
+    holderHeight = 34;
+
+    rightTriangleWidth = topGantryMountWidth - holderWidth - holderDistanceFromLeft;
+
+    tubeHolderMountThickness = 2.5;
+    tubeHolderOuterDiameter = 17;
+    tubeHolderZPos = gantryMountThickness - tubeHolderMountThickness + braceHeight;
+    tubeHolderHeight = 15;
+
+    holderBaseBottomX = holderDistanceFromLeft + (holderWidth - braceWidth) / 2;
+    // left triangle
+    difference() {
+        union() {
+            linear_extrude(gantryMountThickness) {
+                polygon([
+                    [0, 0],
+                    [holderDistanceFromLeft, 0],
+                    [holderDistanceFromLeft, holderBaseHeight],
+                ]);
+            }
+            translate([holderDistanceFromLeft, 0, 0]) {
+                cube([holderWidth, holderBaseHeight, gantryMountThickness]);
+            }
+            translate([holderDistanceFromLeft + holderWidth, 0, 0]) {
+                linear_extrude(gantryMountThickness) {
+                    polygon([
+                        [0, 0],
+                        [0, holderBaseHeight],
+                        [rightTriangleWidth, 0]
+                    ]);
+                }
+            }
+            translate([holderDistanceFromLeft, holderBaseHeight, 0]) {
+                cube([holderWidth, holderHeight, gantryMountThickness]);
+            }
+            translate([holderDistanceFromLeft + holderWidth / 2, holderBaseHeight + holderHeight - tubeHolderHeight, tubeHolderZPos]) {
+                cordHolderTubeMount(tubeHolderMountThickness, tubeHolderOuterDiameter, tubeHolderHeight);
+            }
+            translate([holderDistanceFromLeft, holderBaseHeight + holderHeight - tubeHolderHeight, gantryMountThickness]) {
+                cube([holderWidth, tubeHolderHeight, braceHeight]);
+            }
+            translate([holderBaseBottomX, holderBaseHeight, gantryMountThickness]) {
+                cube([braceWidth, holderHeight, braceHeight]);
+            }
+            translate([0, 0, gantryMountThickness]) {
+                linear_extrude(braceHeight) {
+                    polygon([
+                        [holderBaseBottomX, holderBaseHeight],
+                        [9, 0],
+                        [9 + braceWidth, 0],
+                        [holderDistanceFromLeft, 5.6],
+                        [holderDistanceFromLeft + 2, 5.6],
+                        [37, 0],
+                        [37 + braceWidth, 0],
+                        [holderBaseBottomX + braceWidth, holderBaseHeight],
+                    ]);
+                }
+            }
+        }
+        translate([holderDistanceFromLeft, holderBaseHeight + holderHeight - tubeHolderHeight + 2, gantryMountThickness]) {
+            cordHolderZipTieHoles(holderWidth);
+        }
+        
+    }  
+}
+
+
+module cordHolderZipTieHoles(holderWidth) {
+    holeHeight = 1.5;
+    zipTieWidth = 3.5;
+    holeDistance = 7.4;
+    cube([holderWidth, zipTieWidth, holeHeight]);
+    translate([0, holeDistance]) {
+        cube([holderWidth, zipTieWidth, holeHeight]);
+    }
+}
+
+module cordHolderTubeMount(mountThickness, outerDiameter, holderHeight) {
+    
+    innerDiameter = outerDiameter - mountThickness * 2;
+
+    translate([0, 0, outerDiameter / 2]) {
+        rotate([-90, 0, 0]) {
+            difference() {
+                difference() {
+                    cylinder(holderHeight, outerDiameter / 2, outerDiameter / 2, $fs = 0.2);
+                    cylinder(holderHeight, innerDiameter / 2, innerDiameter / 2, $fs = 0.2);
+                }
+                translate([-outerDiameter / 2, -outerDiameter, 0]) {
+                    cube([outerDiameter, outerDiameter, outerDiameter]);
+                }
+                
+            }
+        }
+    }
+    
+    
+    
+    
 }
 
 module motorMount() {
@@ -65,12 +213,15 @@ module motorMountPositiveForm() {
     union() {
         cube([motorMountThickness, motorWidth, motorMountHeight]);
         translate([0, 0, -motorAngleBracketThickness]) {
-            motorMountBracket();
+            // Lower bracket
+            lowerMotorMountBracket();
         }
         translate([0, 0, -gantryMountThickness]) {
+            // Holds lower bracket to motor mount
             cube([motorMountThickness, motorWidth, gantryMountThickness]);
         }
         translate([0, 0, motorMountHeight - motorAngleBracketThickness]) {
+            // upper angle bracket.
             motorMountBracket();
         }
     }
@@ -109,7 +260,10 @@ module motorMountMotorOpening(depth) {
         rotate([0, 90, 0]) {
             opening = 23;
             radius = opening / 2;
-            cylinder(depth, radius, radius, $fs = 0.2);
+            translate([0, 0, -1]) {
+                cylinder(depth + 2, radius, radius, $fs = 0.2);
+            }
+            
         }
     }
 }
@@ -129,8 +283,85 @@ module motorMountBracket() {
     }   
 }
 
+module lowerMotorMountBracket() {
+    // @see schematics/bltouch.pdf
+
+    // measurements
+    bltouchDepth = 11.5;
+    bltouchScrewDistance = 18;
+    bltouchScrewHoleRadius = 3.2 / 2;
+
+    bltouchAllowance = 3;
+
+    bltouchWidth = bltouchScrewDistance + ((bltouchScrewHoleRadius + 3) * 2);
+
+    bracketLength = motorWidth + bltouchAllowance + bltouchDepth;
+
+    bracketDepth = motorAngleBracketDepth;
+    translate([-bracketDepth, -(bltouchAllowance + bltouchDepth), 0]) {
+        union() {
+            cube([bracketDepth,bracketLength,motorAngleBracketThickness]);
+            translate([bracketDepth,0,0]) {
+                // This is what the bltouch mounts to
+                union() {
+                    difference() {
+                        cube([bltouchWidth, bltouchDepth + bltouchAllowance, motorAngleBracketThickness]);
+                        union() {
+                            translate([bltouchScrewHoleRadius + 3, bltouchDepth / 2, 0]) {
+                                bltouchScrewHole();
+                            }
+                            translate([bltouchScrewHoleRadius + 3 + bltouchScrewDistance, bltouchDepth / 2, 0]) {
+                                bltouchScrewHole();
+                            }
+                        }
+                    }
+                    translate([0, (bltouchDepth + bltouchAllowance) - motorAngleBracketThickness, 0]) {
+                        difference() {
+                            cube([bltouchWidth, motorAngleBracketThickness, 20]);
+                            translate([motorAngleBracketThickness, 0, 0]) {
+                                rotate([90, -90, -180]) {
+                                    linear_extrude(motorAngleBracketThickness) {
+                                        polygon([
+                                            [20, 0],
+                                            [20, bltouchWidth],
+                                            [0, bltouchWidth]
+                                            
+                                        ]);
+                                    }
+                                }
+                            }
+                            
+                        }
+                        
+                        
+                    }
+                    
+                }
+             
+            }
+        }
+        // rotate([0, 0, 180]) {
+        //     linear_extrude(motorAngleBracketThickness) {
+        //         polygon([
+        //             [0, 0],
+        //             [0, bracketLength],
+        //             [motorAngleBracketDepth, 0],
+        //         ]);
+        //     }
+        // }
+    }   
+}
+
+module bltouchScrewHole() {
+    bltouchScrewHoleRadius = 3.2 / 2;
+    translate([0, 0, -1]) {
+        cylinder(h=motorAngleBracketThickness + 2, r= bltouchScrewHoleRadius, $fn = 30);
+    }
+    
+}
+
 module lowerGantryMount() {
-    lowerGantryWidth = 24.8;
+    
     lowerGantryHeight = 7;
     lowerGantryHeightToBracket = lowerGantryHeight + motorAngleBracketThickness;
     translate([-motorAngleBracketDepth, motorWidth, -lowerGantryHeightToBracket]) {
@@ -142,14 +373,11 @@ module lowerGantryMount() {
 }
 
 module topGantryMount() {
-    
-    mountWidth = 43;
-    mountHeight = 7;
-    fullMountHeight = motorAngleBracketThickness + mountHeight;
+    fullMountHeight = motorAngleBracketThickness + topGantryMountHeight;
     translate([-motorAngleBracketDepth, motorWidth, motorMountHeight - motorAngleBracketThickness]) {
         difference() {
-            cube([mountWidth, gantryMountThickness, fullMountHeight]);
-            topGantryMountScrewHoles(mountWidth);
+            cube([topGantryMountWidth, gantryMountThickness, fullMountHeight]);
+            topGantryMountScrewHoles(topGantryMountWidth);
         }
     }
     
@@ -179,7 +407,7 @@ module lowerGantryMountScrewHoles() {
     
 }
 
-module topGantryMountScrewHoles(mountWidth) {
+module topGantryMountScrewHoles(topGantryMountWidth) {
     originalModelScrewHoleDistanceFromTopBracket = 1.9;
     screwHoleDistanceBottom = motorAngleBracketThickness + originalModelScrewHoleDistanceFromTopBracket + (originalModelScrewHole / 2);
     // Distance between the edges of the far right screw and the center screw, from the original model.
@@ -188,7 +416,7 @@ module topGantryMountScrewHoles(mountWidth) {
 
     originalModelDistanceFromRightEdge = 1.9;
 
-    outerRightScrewHoleDistanceFromLeftEdge = mountWidth - originalModelDistanceFromRightEdge - (originalModelScrewHole / 2);
+    outerRightScrewHoleDistanceFromLeftEdge = topGantryMountWidth - originalModelDistanceFromRightEdge - (originalModelScrewHole / 2);
 
     translate([leftScrewDistanceFromLeftEdge(), 0, screwHoleDistanceBottom]) {
         gantryScrewHole();
@@ -210,7 +438,10 @@ module gantryScrewHole() {
 module m3ScrewHole(depth) {
     m3ClearanceDiameter = 3.4;
     radius = m3ClearanceDiameter / 2;
-    cylinder(depth, radius, radius, $fs = 0.2);
+    translate([0, 0, -1]) {
+        cylinder(depth + 2, radius, radius, $fs = 0.2);
+    }
+    
 }
 
 function leftScrewDistanceFromLeftEdge() = originalModelScrewHoleDistanceLeftEdge + (originalModelScrewHole / 2);
