@@ -67,8 +67,8 @@ module hotendHolder() {
     // measurements
     // Distance from left of gantry mount to center of hotend
     leftGantryToHotendCenter = 34;
-    // Distance from top of heatsink to bottom of heating block
-    heatsinkToHeatingBlockDistance = 40.1;
+    // Distance from bottom of heatsink to bottom of inner cylinder mount
+    innerMountBottomToHeatsinkBottom = 33.3;
     // Inner diameter of the part gripped
     innerMountCylinderDiameter = 11.96;
     // Outer diameter of the part above & below the gripped cylinder
@@ -139,6 +139,12 @@ module hotendMountBodyHardwareSubtractions(innerMountCylinderDiameter, innerMoun
         }
         translate([hotendMountExtension / 2, -innerMountHeight / 2, nutPocketDepth]) {
             hotendNutPocket();
+        }
+        translate([ hotendMountWidth - (hotendMountExtension / 2), -innerMountHeight / 2, nutPocketDepth]) {
+            rotate([0, 0, 180]) {
+                hotendNutPocket();
+            }
+            
         }
     }
 }
