@@ -171,13 +171,24 @@ module hotendMount() {
                             // this is the actual mount
                             translate([-bltouchMountWidth / 2, -bltouchMountDepth/2, 0]) {
                                 color("Silver", 1.0) {
-                                    mountDepth = touchToPlate + bltouchMountDepth/2;
-                                    cube([bltouchMountWidth, mountDepth, bltouchMountHeight ]);
-                                    // Now add a brace
                                     braceWidth = 4;
                                     braceHeight = 10;
                                     braceLeft = bltouchMountWidth / 2 - braceWidth / 2;
-                                    translate([bltouchMountWidth / 2 - braceWidth / 2, mountDepth, bltouchMountHeight]) {
+                                    mountDepth = touchToPlate + bltouchMountDepth/2;
+                                    mountBraceLeft = bltouchMountWidth / 2 - braceWidth / 2;
+                                    linear_extrude(height = bltouchMountHeight) {
+                                        polygon([
+                                            [0, 0],
+                                            [bltouchMountWidth, 0],
+                                            [bltouchMountWidth, mountDepth],
+                                            [mountBraceLeft, mountDepth],
+                                            [0, braceLeft]
+                                        ]);
+                                    }
+                                    //cube([bltouchMountWidth, mountDepth, bltouchMountHeight ]);
+                                    // Now add a brace
+                                    
+                                    translate([mountBraceLeft, mountDepth, bltouchMountHeight]) {
                                         rotate(a = [0,90, 0]) {
                                             linear_extrude(height = braceWidth) {
                                                 polygon([
