@@ -16,6 +16,60 @@ http://creativecommons.org/licenses/by-sa/4.0/
 
 **/
 
+renderHelpers = true;
+// E3D V6 heatsink diagram: https://e3d-online.zendesk.com/hc/en-us/article_attachments/360016173777
+
+
+// distance from the bottom of the mounting cylinder to the bottom of the heatsink
+mountToHeatsink = 42.7 - 3.0 - 6.0 - 3.7;
+// measurements
+// Distance from left of gantry mount to center of hotend
+leftGantryToHotendCenter = 34;
+// Inner diameter of the part gripped
+innerMountCylinderDiameter = 11.96;
+// Outer diameter of the part above & below the gripped cylinder
+outerMountCylinderDiameter = 16;
+// The height of the part that's gripped
+innerMountHeight = 6;
+// The height of the lower portion, below the gripped cylinder, to the radiator
+lowerMountCylinderHeight = 7;
+// The diameter of the radiator
+radiatorDiameter = 22;
+
+// BLTouch v2 manual: https://www.antclabs.com/_files/ugd/f5a1c8_ae578955f18f4a02ba55fd1bc0d1fd7d.pdf
+renderBLTouch = true;
+// The top of the bltouch to the base
+bltouchMountToBase = 36.3;
+// the distance between the two mount holes, x axis
+bltouchMountHoleGap = 18;
+// the depth of the bltouch mount, y axis
+bltouchMountDepth = 11.53;
+// the distance from the center of the holes to the front/back
+bltouchMountHoleDepth = 5.77;
+// mount hole radius (standard m3)
+bltouchMountHoleRadius = 3.2;
+// the radius of the plastic surrounding the mount holes
+bltouchMountHolePlasticRadius = 4.0;
+// the width of the mount
+bltouchMountWidth = bltouchMountHoleGap + 2 * (bltouchMountHolePlasticRadius / 2.0);
+
+// height of the structure holding the bltouch
+bltouchMountHeight = 4.0;
+
+// the x width of the bltouch
+bltouchWidth = 13.0;
+
+// The distance vertical distance from the base of the sensor to the tip of the nozzle
+bltouchBaseToNozzle = 8;
+// the minimum distance from the bltouch to the nozzle
+bltouchEdgeToNozzle = 25;
+
+// the actual center of the bltouch to the tip of the nozzle, x distance
+bltouchCenterToNozzle = bltouchEdgeToNozzle + (bltouchWidth / 2);
+
+// distance from the bottom of the heatsink to the nozzle
+heatsinkToNozzle = 19;
+
 motorWidth = 42.3;
 // Distance between each set of screws
 
@@ -67,23 +121,11 @@ module gantryMounts() {
 }
 
 module hotendHolder() {
-    // measurements
-    // Distance from left of gantry mount to center of hotend
-    leftGantryToHotendCenter = 34;
-    // Inner diameter of the part gripped
-    innerMountCylinderDiameter = 11.96;
-    // Outer diameter of the part above & below the gripped cylinder
-    outerMountCylinderDiameter = 16;
-    // The height of the part that's gripped
-    innerMountHeight = 6;
-    // The height of the lower portion, below the gripped cylinder, to the radiator
-    lowerMountCylinderHeight = 7;
-    // The diameter of the radiator
-    radiatorDiameter = 22;
-    hotendMount(innerMountCylinderDiameter, innerMountHeight, outerMountCylinderDiameter, radiatorDiameter, leftGantryToHotendCenter);
+    
+    hotendMount();
 }
 
-module hotendMount(innerMountCylinderDiameter, innerMountHeight, outerMountCylinderDiameter, radiatorDiameter, leftGantryToHotendCenter) {
+module hotendMount() {
     // The extra distance on each side of the part gripping the hotend.
     hotendMountExtension = 12;
     // The target distance between the hotend and the gantry.
@@ -102,6 +144,57 @@ module hotendMount(innerMountCylinderDiameter, innerMountHeight, outerMountCylin
             hotendMountBodyHardwareSubtractions(innerMountCylinderDiameter, innerMountHeight, hotendMountExtension, hotendMountWidth);
         }
         
+    }
+
+    // Rendering BLTouch mount
+    if (renderBLTouch) {
+        hotendXCenter = -motorAngleBracketDepth+ leftGantryToHotendCenter;
+        fullMountHeight = innerMountHeight + lowerOuterMountCylinderHeight + upperOuterMountCylinderHeight;
+        hotendZMountCenter = -lowerGantryHeight + targetHotendHeight - lowerOuterMountCylinderHeight * 2;
+        translate([hotendXCenter, -hotendMountDepth, hotendZMountCenter]) {
+            // we are now at the center of the hotend portion mounted to the holder
+            helperCube("Red");
+            
+            translate([0, 0, -mountToHeatsink]) {
+                // We are now at the tip of the hotend nozzle
+                helperCube("Blue");
+                translate([-bltouchCenterToNozzle, 0, bltouchBaseToNozzle]) {
+                    // We are now at the bottom of the bltouch base
+                    helperCube("Purple");
+                    translate([0, 0, bltouchMountToBase]) {
+                        helperCube("Green");
+                        
+                        translate([bltouchMountHoleGap / 2, 0, 0]) {
+                            // render the center point of the right hand screw
+                            helperCube("HotPink");
+                        }
+
+                        translate([-bltouchMountHoleGap / 2, 0, 0]) {
+                            // render the center point of the left hand screw
+                            helperCube("HotPink");
+                        }
+                        // distance to plate
+                        touchToPlate = hotendMountDepth;
+                        translate([-bltouchMountWidth / 2, -bltouchMountDepth/2, 0]) {
+                            color("Silver", 1.0) {
+                                cube([bltouchMountWidth, touchToPlate + bltouchMountDepth/2, bltouchMountHeight ]);
+                            }
+                        }
+                    }
+                    
+                }
+            }
+        }
+    }
+    
+
+}
+
+module helperCube(targetColor) {
+    if(renderHelpers) {
+        color(targetColor, 1.0) {
+            cube([1,1,1], true);
+        }
     }
 }
 
@@ -372,3 +465,5 @@ module m3ScrewHole(depth) {
 
 function leftScrewDistanceFromLeftEdge() = originalModelScrewHoleDistanceLeftEdge + (originalModelScrewHole / 2);
 function rightScrewHoleDistanceFromLeftEdge() = leftScrewDistanceFromLeftEdge() + originalModelScrewHoleDistance + originalModelScrewHole;
+
+z_dbotBowdenMount();
