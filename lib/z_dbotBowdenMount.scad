@@ -16,8 +16,10 @@ http://creativecommons.org/licenses/by-sa/4.0/
 
 **/
 
-renderHelpers = true;
+renderHelpers = false;
 // E3D V6 heatsink diagram: https://e3d-online.zendesk.com/hc/en-us/article_attachments/360016173777
+radiatorDiameter = 22.3;
+radiatorHeight = 26;
 
 
 // distance from the bottom of the mounting cylinder to the bottom of the heatsink
@@ -34,7 +36,7 @@ innerMountHeight = 6;
 // The height of the lower portion, below the gripped cylinder, to the radiator
 lowerMountCylinderHeight = 7;
 // The diameter of the radiator
-radiatorDiameter = 22;
+radiatorDiameter = 22.3;
 
 // BLTouch v2 manual: https://www.antclabs.com/_files/ugd/f5a1c8_ae578955f18f4a02ba55fd1bc0d1fd7d.pdf
 renderBLTouch = true;
@@ -109,6 +111,13 @@ module z_dbotBowdenMount() {
     
 }
 
+module z_dbotBowdenBracket() {
+    translate([50, 0, 0]) {
+        hotendMount(false);
+    }
+    
+}
+
 module gantryMounts() {
     difference() {
         union() {
@@ -125,7 +134,7 @@ module hotendHolder() {
     hotendMount();
 }
 
-module hotendMount() {
+module hotendMount(withBlTouch = true) {
     // The extra distance on each side of the part gripping the hotend.
     hotendMountExtension = 12;
     // The target distance between the hotend and the gantry.
@@ -147,7 +156,7 @@ module hotendMount() {
     }
 
     // Rendering BLTouch mount
-    if (renderBLTouch) {
+    if (withBlTouch) {
         hotendXCenter = -motorAngleBracketDepth+ leftGantryToHotendCenter;
         fullMountHeight = innerMountHeight + lowerOuterMountCylinderHeight + upperOuterMountCylinderHeight;
         hotendZMountCenter = -lowerGantryHeight + targetHotendHeight - lowerOuterMountCylinderHeight * 2;
@@ -158,69 +167,83 @@ module hotendMount() {
             translate([0, 0, -mountToHeatsink]) {
                 // We are now at the tip of the hotend nozzle
                 helperCube("Blue");
-                translate([-bltouchCenterToNozzle, 0, bltouchBaseToNozzle]) {
-                    // We are now at the bottom of the bltouch base
-                    helperCube("Purple");
-                    translate([0, 0, bltouchMountToBase]) {
-                        helperCube("Green");
+                if (renderHelpers) {
+                    color("Silver", 1.0) {
+                        cylinder(h=radiatorHeight, r=radiatorDiameter/2);
+                    }
+                }
+                translate([0, 0, -heatsinkToNozzle]) {
+                    helperCube("Pink");
+                    translate([-bltouchCenterToNozzle, 0, bltouchBaseToNozzle]) {
                         
+                        // We are now at the bottom of the bltouch base
+                        helperCube("Purple");
                         
-                        // distance to plate
-                        touchToPlate = hotendMountDepth;
-                        difference() {
-                            // this is the actual mount
-                            translate([-bltouchMountWidth / 2, -bltouchMountDepth/2, 0]) {
-                                color("Silver", 1.0) {
-                                    braceWidth = 4;
-                                    braceHeight = 10;
-                                    braceLeft = bltouchMountWidth / 2 - braceWidth / 2;
-                                    mountDepth = touchToPlate + bltouchMountDepth/2;
-                                    mountBraceLeft = bltouchMountWidth / 2 - braceWidth / 2;
-                                    linear_extrude(height = bltouchMountHeight) {
-                                        polygon([
-                                            [0, 0],
-                                            [bltouchMountWidth, 0],
-                                            [bltouchMountWidth, mountDepth],
-                                            [mountBraceLeft, mountDepth],
-                                            [0, braceLeft]
-                                        ]);
-                                    }
-                                    //cube([bltouchMountWidth, mountDepth, bltouchMountHeight ]);
-                                    // Now add a brace
-                                    
-                                    translate([mountBraceLeft, mountDepth, bltouchMountHeight]) {
-                                        rotate(a = [0,90, 0]) {
-                                            linear_extrude(height = braceWidth) {
-                                                polygon([
-                                                    [0, 0],
-                                                    [0, -braceHeight],
-                                                    [-braceLeft, 0]
-                                                ]);
-                                            }
-                                            
-                                            
+                        translate([0, 0, bltouchMountToBase]) {
+                            helperCube("Green");
+                            
+                            
+                            // distance to plate
+                            touchToPlate = hotendMountDepth;
+                            difference() {
+                                // this is the actual mount
+                                translate([-bltouchMountWidth / 2, -bltouchMountDepth/2, 0]) {
+                                    color("Yellow", 1.0) {
+                                        braceWidth = 7;
+                                        braceHeight = 10;
+                                        braceLeft = bltouchMountWidth / 2 - braceWidth / 2;
+                                        mountDepth = touchToPlate + bltouchMountDepth/2;
+                                        mountBraceLeft = bltouchMountWidth / 2 - braceWidth / 2;
+                                        linear_extrude(height = bltouchMountHeight) {
+                                            polygon([
+                                                [0, 0],
+                                                [bltouchMountWidth, 0],
+                                                [bltouchMountWidth, bltouchMountDepth],
+                                                [bltouchMountWidth -3, mountDepth],
+                                                [mountBraceLeft + 8, mountDepth],
+                                                [mountBraceLeft + 8, braceLeft],
+                                                [0, braceLeft]
+                                            ]);
                                         }
+                                        //cube([bltouchMountWidth, mountDepth, bltouchMountHeight ]);
+                                        // Now add a brace
+                                        
+                                        translate([mountBraceLeft + 8, mountDepth, bltouchMountHeight]) {
+                                            rotate(a = [0,90, 0]) {
+                                                linear_extrude(height = braceWidth) {
+                                                    polygon([
+                                                        [0, 0],
+                                                        [0, -braceHeight],
+                                                        [-braceLeft, 0]
+                                                    ]);
+                                                }
+                                                
+                                                
+                                            }
+                                        }
+                                        
                                     }
-                                    
+                                }
+                                // and remove the screw holes
+                                translate([bltouchMountHoleGap / 2, 0, 0]) {
+                                    // render the center point of the right hand screw
+                                    // helperCube("HotPink");
+                                    cylinder(h=30, r=bltouchMountHoleRadius, $fn=30);
+                                }
+
+                                translate([-bltouchMountHoleGap / 2, 0, 0]) {
+                                    // render the center point of the left hand screw
+                                    // helperCube("HotPink");
+                                    cylinder(h=30, r=bltouchMountHoleRadius, $fn=30);
                                 }
                             }
-                            // and remove the screw holes
-                            translate([bltouchMountHoleGap / 2, 0, 0]) {
-                                // render the center point of the right hand screw
-                                // helperCube("HotPink");
-                                cylinder(h=30, r=bltouchMountHoleRadius, $fn=30);
-                            }
-
-                            translate([-bltouchMountHoleGap / 2, 0, 0]) {
-                                // render the center point of the left hand screw
-                                // helperCube("HotPink");
-                                cylinder(h=30, r=bltouchMountHoleRadius, $fn=30);
-                            }
+                            
                         }
                         
                     }
-                    
                 }
+                
+                
             }
         }
     }
@@ -505,3 +528,4 @@ function leftScrewDistanceFromLeftEdge() = originalModelScrewHoleDistanceLeftEdg
 function rightScrewHoleDistanceFromLeftEdge() = leftScrewDistanceFromLeftEdge() + originalModelScrewHoleDistance + originalModelScrewHole;
 
 z_dbotBowdenMount();
+//z_dbotBowdenBracket();
